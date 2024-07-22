@@ -98,7 +98,7 @@ match target_country:
         txt_th_5star = txt_th_5star_USA
         txt_th_ignore = txt_th_ignore_USA
         
-    case "MX":
+    case "MXC":
         zip_code = zip_code_MXC
         url = url_MXC
         txt_th_5star = txt_th_5star_MXC
