@@ -68,8 +68,10 @@ def on_confirm():
         return
     
     try:
-        if selected_retail == "Best Buy":
-            subprocess.run(['python', 'scrapers/best_buy.py', keyword_value, selected_country], check=True)
+        if selected_retail == "Best Buy" and selected_country == "USA":
+            subprocess.run(['python', 'scrapers/best_buy.py', keyword_value], check=True)
+        elif selected_retail == "Best Buy" and selected_country == "CND":
+            subprocess.run(['python', 'scrapers/best_buy_cnd.py', keyword_value], check=True)
         elif selected_retail == "Amazon":
             subprocess.run(['python', 'scrapers/amazon.py', keyword_value, selected_country, str(need_change_location)], check=True)
     except subprocess.CalledProcessError as e:

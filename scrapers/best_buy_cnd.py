@@ -30,11 +30,12 @@ stealth(driver,
 #-----------------------------------------------------Personalization Variables---------------------------------------------------------------------#
 # Get parameters from script frontend
 if len(sys.argv) != 2:
-    print("Usage: python best_buy.py <keyword>")
+    print("Usage: python best_buy.py <keyword> <country>")
     sys.exit(1)
     
-url = "https://www.bestbuy.com/?intl=nosplash"
+url = "https://www.bestbuy.ca/en-ca?intlreferer=https://www.google.com/&intlredir=https://www.bestbuy.com/"
 search_for = sys.argv[1]
+
 
 #-----------------------------------------------------Do Not Modify if no changes are required------------------------------------------------------#
 
