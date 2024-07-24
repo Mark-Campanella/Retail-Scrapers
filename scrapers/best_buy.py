@@ -55,6 +55,11 @@ class_product_price_innerdiv_modal = 'pricing-price'
 class_product_price_btn_close_modal = "c-close-icon.c-modal-close-icon"
 class_product_sku = "product-data-value.body-copy"
 class_product_img="primary-image.max-w-full.max-h-full"
+class_product_features_btn = "c-button-unstyled.features-drawer-btn.w-full.flex.justify-content-between.align-items-center.py-200"
+class_product_features_seemore_btn = "c-button-unstyled.see-more-button.btn-link.bg-none.p-none.border-none.text-style-body-lg-500"
+class_product_features_description_text = "description-text.lv.text-style-body-lg-400"
+class_product_features_div_of_ul_li = "pdp-utils-product-info"
+
 
 class_ul_item_specs = "zebra-stripe-list.inline.m-none.p-none"
 class_li_item_specs = "zebra-list-item.mt-500"
@@ -66,13 +71,13 @@ class_div_spec_text = "w-full"
 next_page = None
 links = []
 products_data = []
-all_headers = ["Link", "Name", "SKU", "Price", "Five Star", "Review Amount", "Image Link"]  # Use list instead of set
+all_headers = ["Link", "Name", "SKU", "Price", "Five Star", "Review Amount", "Image Link", 'Description']  # Use list instead of set
 
 #----------------------------------------------------------------Functions-------------------------------------------------------------------------#
 def handle_survey():
     try:
         # If survey is noticed then click the no button, else, continue
-        no_thanks_button = WebDriverWait(driver, 5).until(
+        no_thanks_button = WebDriverWait(driver, 2).until(
             EC.presence_of_element_located((By.ID, "survey_invite_no"))
         )
         no_thanks_button.click()
@@ -180,6 +185,70 @@ def process_product(driver, link):
         except: print("Couldn't close the modal nand/nor get the price properly")
         
     try:
+        description_features = []
+        try:
+            # Wait for and click the product features button
+            features_btn = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, class_product_features_btn))
+            )
+            features_btn.click()
+        except Exception as e: print("There was a problem finding the Features Button: ", e)
+        
+        try:
+            # Wait for and click the 'See More' button if it exists
+            see_more_btn = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.CLASS_NAME, class_product_features_seemore_btn))
+            ) 
+            see_more_btn.click()
+        except Exception as e:
+            print("No 'See More' button found:", e)
+        try:
+            # Wait for and extract the main features description
+            features_description = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.CLASS_NAME, class_product_features_description_text))
+            ).text
+
+            description_features.append(features_description)
+        except: print('No text description found')
+        
+        # Wait for the div containing the list of features
+        div_of_features = WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CLASS_NAME, class_product_features_div_of_ul_li))
+        )
+
+        # Extract the features list
+        list_of_features = div_of_features.find_elements(By.TAG_NAME, "li")
+        for each_element in list_of_features:
+            try:
+                try:
+                    h4 = each_element.find_element(By.TAG_NAME, 'h4').text
+                except: h4=''
+                p = each_element.find_element(By.TAG_NAME, 'p').text        
+                description_line = f"{h4}: {p}, "
+                description_features.append(description_line)
+                
+            except Exception as e:
+                print("Error extracting feature:", e)
+                continue
+
+        product_info['Description'] = description_features
+        
+    except Exception as e:
+        product_info['Description'] = "N/A"
+        print("Error getting Features:", e)
+        
+    finally:
+        try:
+            # Attempt to close any modal that might be open
+            close_icon = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.CLASS_NAME, 'c-close-icon'))
+            )
+            close_icon.click()
+        except Exception as e:
+            print("No close icon found, refreshing page:", e)
+            driver.refresh()
+            
+    try:
         five_star = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, class_product_5_star))
         ).text
@@ -259,9 +328,18 @@ try:
         You need to uncomment and fix indentation, also look at the code below, might be useful
     '''
     try:
-        links = pd.read_csv("statics/product_links_BB.csv")
+        links = pd.read_csv("statics/product_link_BB.csv")
         links = links["Product Links"].to_list()
-          
+        if links == None:
+            scrape_page(driver)
+        while True:
+            handle_survey()
+            scrape_page(driver)
+            if next_page: 
+                driver.get(next_page)
+                print(f"Navigating to next page: {next_page}")
+            else: 
+                break
     except:
         scrape_page(driver)
         while True:
@@ -282,7 +360,7 @@ if not os.path.exists("statics/product_links_BB.csv"):
 
 process_products(driver)
 
-# Convert the list of dictionaries into a dataframe, printing top 5 items for checking
+# Convert the list of dictionaries into a dataframe
 df = pd.DataFrame(products_data)
 
 # Ensure all headers are included
@@ -291,7 +369,7 @@ for header in all_headers:
         df[header] = "N/A"
 
 # Reorder columns based on all_headers
-columns_order = ['Link', 'Name', 'SKU', 'Price', 'Five Star', 'Review Amount', 'Image Link'] + sorted([header for header in all_headers if header not in ['Link', 'Name', 'SKU', 'Price', 'Five Star', 'Review Amount', 'Image Link']])
+columns_order = ['Link', 'Name', 'SKU', 'Price', 'Five Star', 'Review Amount', 'Image Link', 'Description'] + sorted([header for header in all_headers if header not in ['Link', 'Name', 'SKU', 'Price', 'Five Star', 'Review Amount', 'Image Link', 'Description']])
 df = df.reindex(columns=columns_order)
 
 print(df.head(20))
