@@ -13,6 +13,8 @@ class SimpleDialog(CTK.CTk):
         button = CTK.CTkButton(self, text="OK", command=self.destroy)
         button.pack(pady=10)
         
+        self.iconbitmap('statics/error.ico')
+        
 class CustomFrame(CTK.CTkFrame):
     def __init__(self, master=None, label_text="", combobox_values=[], **kwargs):
         super().__init__(master, **kwargs)
@@ -71,7 +73,10 @@ def on_confirm():
         if selected_retail == "Best Buy" and selected_country == "USA":
             subprocess.run(['python', 'scrapers/best_buy.py', keyword_value], check=True)
         elif selected_retail == "Best Buy" and selected_country == "CND":
-            subprocess.run(['python', 'scrapers/best_buy_cnd.py', keyword_value], check=True)
+            #subprocess.run(['python', 'scrapers/best_buy_cnd.py', keyword_value], check=True)
+            dialog = SimpleDialog(title="In progress", message="Not there yet, future release")
+            center_window(dialog, 300, 150)
+            dialog.mainloop()
         elif selected_retail == "Amazon":
             subprocess.run(['python', 'scrapers/amazon.py', keyword_value, selected_country, str(need_change_location)], check=True)
     except subprocess.CalledProcessError as e:

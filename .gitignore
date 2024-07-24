@@ -1,3 +1,4 @@
 outputs/Amazon/*.csv
 outputs/Best_Buy/*.csv
 statics/*.csv
+scrapers/cnd_best_buy.py
