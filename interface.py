@@ -91,7 +91,7 @@ def update_country_list(*args):
     if list_CB:
         country_combobox.set(list_CB[0])  # Set default value if available
 
-CTK.set_appearance_mode('light')
+CTK.set_appearance_mode('dark')
 CTK.set_default_color_theme('dark-blue')
 
 # Setup the main window
@@ -116,7 +116,7 @@ keyword_frame.pack(pady=10, padx=20, fill='x')
 keyword_frame.entry.configure(textvariable=keyword)
 
 # Retail combobox frame
-retail_frame = CustomFrame(frame, label_text="Retail", combobox_values=['Amazon', 'Best Buy'])
+retail_frame = CustomFrame(frame, label_text="            Retail            ", combobox_values=['Amazon', 'Best Buy'])
 retail_frame.pack(pady=10, padx=20, fill='x')
 
 retail = CTK.StringVar(value="")
@@ -124,7 +124,7 @@ retail_frame.combobox.configure(variable=retail)
 retail.trace_add('write', update_country_list)
 
 # Country combobox frame
-country_frame = CustomFrame(frame, label_text="Country to Scrape", combobox_values=[''])
+country_frame = CustomFrame(frame, label_text=" Country to Scrape ", combobox_values=[''])
 country_frame.pack(pady=10, padx=20, fill='x')
 
 country_combobox = country_frame.combobox

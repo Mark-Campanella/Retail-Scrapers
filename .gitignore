@@ -1,2 +1,3 @@
-outputs/Amazon/product_data.csv
-outputs/Best_Buy/product_data.csv
+outputs/Amazon/*.csv
+outputs/Best_Buy/*.csv
+statics/*.csv
