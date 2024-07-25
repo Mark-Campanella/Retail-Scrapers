@@ -44,23 +44,32 @@ class_search_button = "header-search-button"
 class_items = "sku-item"
 class_next_button = "sku-list-page-next"
 
-class_show_full_specs = "c-button.c-button-outline.c-button-md.show-full-specs-btn.col-xs-6"
 
 class_product_5_star = "ugc-c-review-average.font-weight-medium.order-1"
 class_product_review_amount = "c-reviews.order-2"
+class_product_sku = "product-data-value.body-copy"
+class_product_img="primary-image.max-w-full.max-h-full"
+
 class_product_price = "priceView-hero-price.priceView-customer-price"
 class_product_price_btn_modal = "priceView-tap-to-view-price.priceView-tap-to-view-price-bold"
 class_product_price_div_modal = 'restricted-pricing__regular-price-section'
 class_product_price_innerdiv_modal = 'pricing-price'
 class_product_price_btn_close_modal = "c-close-icon.c-modal-close-icon"
-class_product_sku = "product-data-value.body-copy"
-class_product_img="primary-image.max-w-full.max-h-full"
+
 class_product_features_btn = "c-button-unstyled.features-drawer-btn.w-full.flex.justify-content-between.align-items-center.py-200"
 class_product_features_seemore_btn = "c-button-unstyled.see-more-button.btn-link.bg-none.p-none.border-none.text-style-body-lg-500"
 class_product_features_description_text = "description-text.lv.text-style-body-lg-400"
 class_product_features_div_of_ul_li = "pdp-utils-product-info"
 
+class_btn_more_images = 'has-text.rounded-corners.align-items-center.bg-cover.bg-transparent.flex.flex-column.border-none.justify-center.p-none.relative'
+class_div_images =  "c-tile.border.rounded.v-base.thumbnail-container"
+class_div_btn_images_initial = "image-button.align-items-center.bg-cover.bg-transparent.flex.flex-column.border-none.justify-center.p-none.relative.rounded-corners.align-items-center.bg-cover.bg-transparent.flex.flex-column.border-none.justify-center.p-none.relative.rounded-100.z-1"
+class_div_btn_images = "image-button.align-items-center.bg-cover.bg-transparent.flex.flex-column.border-none.justify-center.p-none.relative"
+class_videos_btn = 'tab-title.v-bg-pure-white.border-none.text-primary.heading-6.p-0.relative.t-1px.heading-6.v-fw-regular'
+class_videos_list = 'thumbnail-content.inline-block.mr-150.inline-align-top.mb-300.w-full'
+class_each_video_btn = 'video-image-button.align-items-center.bg-cover.bg-transparent.flex.flex-row.border-none.justify-center.p-none.relative'
 
+class_show_full_specs = "c-button.c-button-outline.c-button-md.show-full-specs-btn.col-xs-6"
 class_ul_item_specs = "zebra-stripe-list.inline.m-none.p-none"
 class_li_item_specs = "zebra-list-item.mt-500"
 class_div_each_spec = "zebra-row.flex.p-200.justify-content-between.body-copy-lg"
@@ -71,7 +80,7 @@ class_div_spec_text = "w-full"
 next_page = None
 links = []
 products_data = []
-all_headers = ["Link", "Name", "SKU", "Price", "Five Star", "Review Amount", "Image Link", 'Description']  # Use list instead of set
+all_headers = ["Link", "Name", "SKU", "Price", "Five Star", "Review Amount", "Image Link", 'Description', 'More Images Links', 'Videos Links'] 
 
 #----------------------------------------------------------------Functions-------------------------------------------------------------------------#
 def handle_survey():
@@ -115,8 +124,11 @@ def process_product(driver, link):
     driver.get(link)
     driver.implicitly_wait(20)
     handle_survey()
+    
+    #----------------------------------------------------------------------------------------------------------------------------------------------------------------------GET LINK
     product_info = {'Link': link}
     
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------GET PRODUCT NAME
     try:
         product_name_element = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.TAG_NAME, "h1"))
@@ -126,7 +138,8 @@ def process_product(driver, link):
         product_info['Name'] = "N/A"
         print("Error getting product name:", e)
     if "Package" in product_info['Name']: return
-
+    
+    #---------------------------------------------------------------------------------------------------------------------------------------------------------------GET PRODUCT SKU
     try:
         product_sku_element = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CLASS_NAME, class_product_sku))
@@ -136,15 +149,16 @@ def process_product(driver, link):
         product_info['SKU'] = "N/A"
         print("Error getting product SKU:", e)
         
+    #-------------------------------------------------------------------------------------------------------------------------------------------------------------GET PRODUCT IMAGE    
     try:
         product_image_link = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CLASS_NAME, class_product_img))
-        )
+            EC.presence_of_element_located((By.CLASS_NAME, class_product_img)))
         product_info['Image Link'] = product_image_link.get_attribute('src')
     except Exception as e:
         product_info['Image Link'] = "N/A"
-        print("Error getting product SKU:", e)    
-    
+        print("Error getting product SKU:", e)      
+              
+    #-------------------------------------------------------------------------------------------------------------------------------------------------------------GET PRODUCT PRICE
     try:
         price_div = driver.find_element(By.CLASS_NAME, class_product_price)
         product_info['Price'] = price_div.find_element(By.TAG_NAME, 'span').text
@@ -184,6 +198,72 @@ def process_product(driver, link):
                         print("Error in all atempts to click in the close button: ", all_e)
         except: print("Couldn't close the modal nand/nor get the price properly")
         
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------GET MORE PRODUCT IMAGE
+        #TODO TEST!!   
+    inner_div_more_images = []
+    btn_images = []
+    images = []
+    try:
+        btn_more_images = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.CLASS_NAME, class_btn_more_images)))
+        btn_more_images.click()
+        try:
+            div_ol_more_images = driver.find_element(By.CLASS_NAME,'carousel-indicate.flex.flex-row.flex-wrap')
+            try:
+                div_li_more_images = div_ol_more_images.find_elements(By.CLASS_NAME,'thumbnail-content.inline-block.mr-150.mb-150.inline-align-top')
+                try:
+                    for each_li in div_li_more_images:
+                        inner_div_more_images.append(each_li.find_element(By.CLASS_NAME,class_div_images))
+                    for each_div_more_images in inner_div_more_images:
+                        btn_images.append(each_div_more_images.find_element(By.TAG_NAME, 'button'))
+                    for each_btn in btn_images:
+                        try:
+                            images.append(each_btn.find_element(By.TAG_NAME,'img').get_attribute('src'))
+                        except: pass
+                    product_info['More Images Links'] = images  
+                except Exception as e: 
+                    product_info['More Images Links'] = "N/A"
+                    print("Error getting More Images could not get the div, or buttons, or image of each image", e)
+            except Exception as e:
+                product_info['More Images Links'] = "N/A"
+                print("Error getting More Images could not get the <li>s", e)    
+        except Exception as e:       
+            product_info['More Images Links'] = "N/A"
+            print("Error getting More Images could not get the <ol>", e) 
+    except Exception as e: 
+        product_info['More Images Links'] = "N/A"
+        print("Error getting More Images, could not click in the more images button", e)
+        
+    #------------------------------------------------------------------------------------------------------------------------------------------------------------GET PRODUCT VIDEOS    
+    try:
+        videos=[]
+        button_list = []
+        btn_videos = driver.find_element(By.CLASS_NAME, class_videos_btn)
+        btn_videos.click()
+        try:    
+            list_of_videos = driver.find_elements(By.CLASS_NAME,class_videos_list)      
+            try:
+                for item in list_of_videos:
+                    button_list.append(item.find_element(By.CLASS_NAME,class_each_video_btn))
+                try:
+                    for button in button_list: 
+                        button.click()
+                        video = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.TAG_NAME,'source'))).get_attribute('src')
+                        videos.append(video)
+                    product_info['Videos Links'] = videos
+                except Exception as e: print("Could not get the buttons or the videos", e)
+            except Exception as e: print("Could not get the list of videos", e)
+        except Exception as e: print("Could not find the video button, error: ", e)              
+    except Exception as e:
+        product_info['Videos Links'] = "N/A"
+        print("Error getting Videos Links:", e)    
+    try: 
+        driver.find_element(By.CLASS_NAME,"c-close-icon.c-modal-close-icon").click()
+    except Exception as e:
+        print("Couldn't click quit button, refreashing...")
+        driver.refresh()
+        
+    #--------------------------------------------------------------------------------------------------------------------------------------------------GET DESCRIPTION AND FEATURES        
     try:
         description_features = []
         try:
@@ -248,6 +328,7 @@ def process_product(driver, link):
             print("No close icon found, refreshing page:", e)
             driver.refresh()
             
+    #----------------------------------------------------------------------------------------------------------------------------------------------------GET PRODUCT 5-STAR REVIEWS        
     try:
         five_star = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, class_product_5_star))
@@ -256,7 +337,8 @@ def process_product(driver, link):
     except Exception as e:
         product_info['Five Star'] = "N/A"
         print("Error getting five star rating:", e)
-
+        
+    #-------------------------------------------------------------------------------------------------------------------------------------------------------------GET REVIEW AMOUNT
     try:
         review_amount = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, class_product_review_amount))
@@ -266,6 +348,7 @@ def process_product(driver, link):
         product_info['Review Amount'] = "N/A"
         print("Error getting review amount:", e)
     
+    #---------------------------------------------------------------------------------------------------------------------------------------------------------------------GET SPECS
     try:
         WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CLASS_NAME, class_show_full_specs))).click()
     except Exception as e:
@@ -323,23 +406,33 @@ try:
     button.click()
     
     driver.implicitly_wait(20)  # Wait for it to load
+    
     '''
     This section is useful for test purposes
         You need to uncomment and fix indentation, also look at the code below, might be useful
     '''
+    test_links = "statics/test_product_link_BB.csv"
+    real_links = "statics/product_link_BB.csv"
+    test_output_path = 'outputs/Best_Buy/test_product_data.csv'
+    real_output_path= 'outputs/Best_Buy/product_data.csv'
+    
     try:
-        links = pd.read_csv("statics/product_link_BB.csv")
+        #If exists, run based on the links given
+        links = pd.read_csv(test_links)
         links = links["Product Links"].to_list()
+        
+        #If no links in the file, execute the routine
         if links == None:
             scrape_page(driver)
-        while True:
-            handle_survey()
-            scrape_page(driver)
-            if next_page: 
-                driver.get(next_page)
-                print(f"Navigating to next page: {next_page}")
-            else: 
-                break
+            while True:
+                handle_survey()
+                scrape_page(driver)
+                if next_page: 
+                    driver.get(next_page)
+                    print(f"Navigating to next page: {next_page}")
+                else: 
+                    break
+    #If file doesn't exist, run routine to get it and save it later
     except:
         scrape_page(driver)
         while True:
@@ -354,9 +447,9 @@ try:
 except Exception as e:
     print("Not able to run the code, error: ", e)
 
-if not os.path.exists("statics/product_links_BB.csv"):
+if not os.path.exists(test_links):
     df = pd.DataFrame(links, columns=['Product Links'])
-    df.to_csv("statics/product_links_BB.csv", index=False)
+    df.to_csv(test_links, index=False)
 
 process_products(driver)
 
@@ -369,10 +462,10 @@ for header in all_headers:
         df[header] = "N/A"
 
 # Reorder columns based on all_headers
-columns_order = ['Link', 'Name', 'SKU', 'Price', 'Five Star', 'Review Amount', 'Image Link', 'Description'] + sorted([header for header in all_headers if header not in ['Link', 'Name', 'SKU', 'Price', 'Five Star', 'Review Amount', 'Image Link', 'Description']])
+columns_order = all_headers + sorted([header for header in all_headers if header not in all_headers])
 df = df.reindex(columns=columns_order)
 
 print(df.head(20))
-df.to_csv('outputs/Best_Buy/product_data.csv', index=False)
+df.to_csv(test_output_path, index=False)
 
 driver.quit()
