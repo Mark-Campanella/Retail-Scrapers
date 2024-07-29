@@ -1,5 +1,8 @@
 import customtkinter as CTK
 import subprocess
+from tkinter import filedialog
+import os
+import shutil
 
 class SimpleDialog(CTK.CTk):
     def __init__(self, master=None, title="", message=""):
@@ -14,7 +17,7 @@ class SimpleDialog(CTK.CTk):
         button.pack(pady=10)
         
         self.iconbitmap('statics/error.ico')
-        
+
 class CustomFrame(CTK.CTkFrame):
     def __init__(self, master=None, label_text="", combobox_values=[], **kwargs):
         super().__init__(master, **kwargs)
@@ -73,12 +76,16 @@ def on_confirm():
         if selected_retail == "Best Buy" and selected_country == "USA":
             subprocess.run(['python', 'scrapers/best_buy.py', keyword_value], check=True)
         elif selected_retail == "Best Buy" and selected_country == "CND":
-            #subprocess.run(['python', 'scrapers/best_buy_cnd.py', keyword_value], check=True)
+            # subprocess.run(['python', 'scrapers/best_buy_cnd.py', keyword_value], check=True)
             dialog = SimpleDialog(title="In progress", message="Not there yet, future release")
             center_window(dialog, 300, 150)
             dialog.mainloop()
         elif selected_retail == "Amazon":
             subprocess.run(['python', 'scrapers/amazon.py', keyword_value, selected_country, str(need_change_location)], check=True)
+        
+        # Habilitar o botão de download após a conclusão do subprocesso
+        download_button.configure(state='normal')
+        
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while executing the script: {e}")
         show_message()
@@ -95,6 +102,20 @@ def update_country_list(*args):
     country_combobox.configure(values=list_CB)
     if list_CB:
         country_combobox.set(list_CB[0])  # Set default value if available
+
+def on_button_click():
+    directory = filedialog.askdirectory(title="Choose a folder to Download the CSV")
+    if directory:
+        save_csv_file(directory)
+
+def save_csv_file(directory):
+    source_file = "outputs/Best_Buy/test_product_data.csv"
+    if os.path.exists(source_file):
+        destination_file = os.path.join(directory, "product_data.csv")
+        shutil.copy(source_file, destination_file)
+        print(f"Arquivo salvo em: {destination_file}")
+    else:
+        print(f"O arquivo {source_file} não existe.")
 
 CTK.set_appearance_mode('dark')
 CTK.set_default_color_theme('dark-blue')
@@ -142,5 +163,8 @@ need_change_location_cb.pack(pady=24, padx=20)
 
 confirm_button = CTK.CTkButton(master=frame, text='Confirm', command=on_confirm)
 confirm_button.pack(pady=10, padx=20)
+
+download_button = CTK.CTkButton(master=frame, text='Download Products Data', command=on_button_click, state='disabled')
+download_button.pack(pady=10, padx=20)
 
 root.mainloop()

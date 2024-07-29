@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 import pandas as pd
 import os
+from routines.Best_Buy.BB_US_Laundry_Cleaner import cleanup
 
 #-------------------------------------------------------Driver CONFIGURATION-------------------------------------------------------------------------#
 chrome_options = Options()
@@ -465,7 +466,10 @@ for header in all_headers:
 columns_order = all_headers + sorted([header for header in all_headers if header not in all_headers])
 df = df.reindex(columns=columns_order)
 
+if 'washer' in search_for or 'dryer' in search_for:
+    df = cleanup(df)
+    
 print(df.head(20))
-df.to_csv(test_output_path, index=False)
+df.to_csv(test_output_path, index=False)   
 
 driver.quit()
