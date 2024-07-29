@@ -412,10 +412,10 @@ try:
     This section is useful for test purposes
         You need to uncomment and fix indentation, also look at the code below, might be useful
     '''
-    test_links = "../statics/test_product_link_BB.csv"
-    real_links = "../statics/product_link_BB.csv"
-    test_output_path = '../outputs/Best_Buy/test_product_data.csv'
-    real_output_path= '../outputs/Best_Buy/product_data.csv'
+    test_links = "statics/test_product_link_BB.csv"
+    real_links = "statics/product_link_BB.csv"
+    test_output_path = 'outputs/Best_Buy/test_product_data.csv'
+    real_output_path= 'outputs/Best_Buy/product_data.csv'
     
     try:
         #If exists, run based on the links given
@@ -457,17 +457,21 @@ process_products(driver)
 # Convert the list of dictionaries into a dataframe
 df = pd.DataFrame(products_data)
 
+
+
 # Ensure all headers are included
 for header in all_headers:
     if header not in df.columns:
         df[header] = "N/A"
-
 # Reorder columns based on all_headers
 columns_order = all_headers + sorted([header for header in all_headers if header not in all_headers])
 df = df.reindex(columns=columns_order)
-
-if 'washer' in search_for or 'dryer' in search_for:
+df_save = df.copy()
+try:
     df = cleanup(df)
+except Exception as e:
+    print("Not able to cleanup, ", e)
+    df = df_save
     
 print(df.head(20))
 df.to_csv(test_output_path, index=False)   
