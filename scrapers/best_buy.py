@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 import pandas as pd
 import os
-from routines.Best_Buy.BB_US_Laundry_Cleaner import cleanup
+from routines.Laundry.bb_file_cleaner import cleanup
 
 #-------------------------------------------------------Driver CONFIGURATION-------------------------------------------------------------------------#
 chrome_options = Options()
@@ -412,10 +412,10 @@ try:
     This section is useful for test purposes
         You need to uncomment and fix indentation, also look at the code below, might be useful
     '''
-    test_links = "statics/test_product_link_BB.csv"
-    real_links = "statics/product_link_BB.csv"
-    test_output_path = 'outputs/Best_Buy/test_product_data.csv'
-    real_output_path= 'outputs/Best_Buy/product_data.csv'
+    test_links = "../statics/test_product_link_BB.csv"
+    real_links = "../statics/product_link_BB.csv"
+    test_output_path = '../outputs/Best_Buy/test_product_data.csv'
+    real_output_path= '../outputs/Best_Buy/product_data.csv'
     
     try:
         #If exists, run based on the links given

@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 import pandas as pd
-from routines.Amazon.Amazon_Laundry import cleanup_BR, cleanup_US
+from routines.Laundry.amazon_file_cleaner_laundry import cleanup_BR, cleanup_USA
 
 # Receive values from script frontend
 if len(sys.argv) != 4:
@@ -342,8 +342,8 @@ print(df.head(20))
 df.to_csv('outputs/Amazon/product_data.csv', index=False)
 if 'washer' in keyword or 'dryer' in keyword:
     match target_country:
-        case 'USA': df = cleanup_US(df)
+        case 'USA': df = cleanup_USA(df)
         case 'BR': df = cleanup_BR(df)
         case 'MX': print('not implemented yet')
         case 'India': print('not implemented yet')
-df.to_csv('../outputs/Amazon/product_data_cleaned.csv', index=False)
+df.to_csv('../outputs/Amazon/product_data.csv', index=False)
