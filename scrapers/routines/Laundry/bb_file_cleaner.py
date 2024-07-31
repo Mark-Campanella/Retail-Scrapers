@@ -64,7 +64,33 @@ def cleanup(df: pd.DataFrame):
         else:
             return round(float(value), 2)
         
-        
+    def fill_launch_year(row):
+        if pd.isna(row["Brand"]) or ("Whirlpool" not in row["Brand"] and "Maytag" not in row["Brand"]):
+            row["Launch Year"] = ""
+            return row
+
+        if pd.isna(row['Launch Year']):
+            sku = row['SKU']
+            letter = sku[-2]
+            if letter == 'b':
+                row["Launch Year"] = "2013"
+            elif letter == 'd':
+                row["Launch Year"] = "2014"
+            elif letter == 'f':
+                row["Launch Year"] = "2016"
+            elif letter == 'g':
+                row["Launch Year"] = "2017"
+            elif letter == 'h':
+                row["Launch Year"] = "2018"
+            elif letter == 'l':
+                row["Launch Year"] = "2021"
+            elif letter == 'm':
+                row["Launch Year"] = "2022"
+            elif letter == 'p':
+                row["Launch Year"] = "2023"
+            else:
+                row["Launch Year"] = ""
+        return row
     
     df = df.dropna(axis=1, how='all')
     df = df.dropna(axis=0, how='all')
@@ -102,6 +128,11 @@ def cleanup(df: pd.DataFrame):
         df[['OBX', 'SKU']] = df['SKU'].apply(lambda x: pd.Series(clean_SKU(x)))
     except Exception as e:
         print('No cleanup on the SKU // OBX done', e)
+    try:    
+        df["Launch Year"] = None
+        df = df.apply(fill_launch_year, axis=1)
+    except Exception as e:
+        print("Not able to add Launch Year, because: ", e)
         
     # df['Voltage'] = df['Voltage'].fillna(df['Washer Voltage'])
     return df
