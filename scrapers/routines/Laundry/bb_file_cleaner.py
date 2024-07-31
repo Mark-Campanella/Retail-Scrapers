@@ -21,6 +21,8 @@ def cleanup(df: pd.DataFrame):
         if isinstance(text, list):
             # Se for uma lista, remover os colchetes de cada item da lista
             return '\n'.join([str(item).replace('[','').replace(']','') for item in text])
+        elif isinstance(text, float):
+            return text
         else:
             # Se não for uma lista ou não puder ser avaliado, simplesmente remover os colchetes
             return text.replace('[','').replace(']','')  
@@ -74,7 +76,6 @@ def cleanup(df: pd.DataFrame):
         df['More Images Links'] = df['More Images Links'].apply(clean_brackets).apply(remove_max_dimensions)
         df['Videos Links'] = df['Videos Links'].apply(clean_brackets)
     except Exception as e:
- 
         print('not able to cleanup list-like objects', e)
     try:
         df['Review Amount'] = df['Review Amount'].apply(clean_reviews)

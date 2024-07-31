@@ -242,15 +242,18 @@ def process_product(driver, link):
         btn_videos = driver.find_element(By.CLASS_NAME, class_videos_btn)
         btn_videos.click()
         try:    
-            list_of_videos = driver.find_elements(By.CLASS_NAME,class_videos_list)      
+            list_of_videos = WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.CLASS_NAME,class_videos_list)))      
             try:
                 for item in list_of_videos:
                     button_list.append(item.find_element(By.CLASS_NAME,class_each_video_btn))
                 try:
-                    for button in button_list: 
-                        button.click()
-                        video = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.TAG_NAME,'source'))).get_attribute('src')
-                        videos.append(video)
+                    for button in button_list:
+                        try:
+                            button.click()
+                            video = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.TAG_NAME,'source'))).get_attribute('src')
+                            videos.append(video)
+                        except:
+                            pass
                     product_info['Videos Links'] = videos
                 except Exception as e: print("Could not get the buttons or the videos", e)
             except Exception as e: print("Could not get the list of videos", e)
@@ -278,7 +281,7 @@ def process_product(driver, link):
         try:
             # Wait for and click the 'See More' button if it exists
             see_more_btn = WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.CLASS_NAME, class_product_features_seemore_btn))
+                EC.element_to_be_clickable((By.CLASS_NAME, class_product_features_seemore_btn))
             ) 
             see_more_btn.click()
         except Exception as e:
@@ -463,8 +466,11 @@ df = pd.DataFrame(products_data)
 for header in all_headers:
     if header not in df.columns:
         df[header] = "N/A"
+        
+##custom_headers = ["Brand","Capacity","Product Width", "Product Height", "Product Depth", "Washer Load Type"]
 # Reorder columns based on all_headers
-columns_order = all_headers + sorted([header for header in all_headers if header not in all_headers])
+remaining_headers = [header for header in all_headers if header not in (all_headers)]
+columns_order = all_headers + remaining_headers
 df = df.reindex(columns=columns_order)
 df_save = df.copy()
 try:
