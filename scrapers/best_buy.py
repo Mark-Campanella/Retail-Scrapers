@@ -9,6 +9,7 @@ from selenium_stealth import stealth
 import pandas as pd
 import os
 from routines.Laundry.bb_file_cleaner import cleanup
+from csv_diff import load_csv, compare
 
 #-------------------------------------------------------Driver CONFIGURATION-------------------------------------------------------------------------#
 chrome_options = Options()
@@ -419,10 +420,10 @@ try:
     real_links = "statics/product_link_BB.csv"
     test_output_path = 'outputs/Best_Buy/test_product_data.csv'
     real_output_path= 'outputs/Best_Buy/product_data.csv'
-    
+    no_file = "statics/no_file.csv"
     try:
         #If exists, run based on the links given
-        links = pd.read_csv(test_links)
+        links = pd.read_csv(no_file)
         links = links["Product Links"].to_list()
         
         #If no links in the file, execute the routine
@@ -480,6 +481,10 @@ except Exception as e:
     df = df_save
     
 print(df.head(20))
-df.to_csv(test_output_path, index=False)   
+old_csv = load_csv(open(test_output_path),key="SKU")
+df.to_csv(test_output_path, index=False)
+new_csv = load_csv(open(test_output_path),key="SKU")
+difference = compare(old_csv,new_csv)
+pd.DataFrame(difference).to_csv("output/changes.csv")   
 
 driver.quit()
