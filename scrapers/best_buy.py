@@ -416,14 +416,18 @@ try:
     This section is useful for test purposes
         You need to uncomment and fix indentation, also look at the code below, might be useful
     '''
+    #Links - test and speed process
     test_links = "statics/test_product_link_BB.csv"
     real_links = "statics/product_link_BB.csv"
+    #Outputs
     test_output_path = 'outputs/Best_Buy/test_product_data.csv'
     real_output_path= 'outputs/Best_Buy/product_data.csv'
+    changelog_path = 'outputs/Best_Buy/changes.csv'
+    #Force run
     no_file = "statics/no_file.csv"
     try:
         #If exists, run based on the links given
-        links = pd.read_csv(no_file)
+        links = pd.read_csv(real_links)
         links = links["Product Links"].to_list()
         
         #If no links in the file, execute the routine
@@ -452,16 +456,14 @@ try:
 except Exception as e:
     print("Not able to run the code, error: ", e)
 
-if not os.path.exists(test_links):
+if not os.path.exists(real_links):
     df = pd.DataFrame(links, columns=['Product Links'])
-    df.to_csv(test_links, index=False)
+    df.to_csv(real_links, index=False)
 
 process_products(driver)
 
 # Convert the list of dictionaries into a dataframe
 df = pd.DataFrame(products_data)
-
-
 
 # Ensure all headers are included
 for header in all_headers:
@@ -474,17 +476,38 @@ remaining_headers = [header for header in all_headers if header not in (all_head
 columns_order = all_headers + remaining_headers
 df = df.reindex(columns=columns_order)
 df_save = df.copy()
+
+#Now we have the df with updated info
 try:
     df = cleanup(df)
 except Exception as e:
     print("Not able to cleanup, ", e)
     df = df_save
     
+#Get last scraped information
+try:
+    df_old = pd.read_csv(real_output_path)
+except FileNotFoundError as e: print ("Not able to locate file: ",e)
+except Exception as e: print("Error: ", e)
+#compare the SKU to see if there were models coming in and out 
+try:
+    # See SKUs removed
+    removed_skus = df_old[~df_old['SKU'].isin(df['SKU'])].copy()
+    removed_skus['status'] = 'removed'
+
+    # See SKUs added
+    added_skus = df[~df['SKU'].isin(df_old['SKU'])].copy()
+    added_skus['status'] = 'added'
+
+    # Merge
+    df_changed = pd.concat([removed_skus, added_skus], ignore_index=True)
+    df_changed.to_csv('df_changed.csv', index=False)
+except Exception as e:
+    print("Not able to detect changes! Something went wrong: ",e)
+finally:
+    # Save the updated DataFrames to be new "old"
+    df.to_csv(real_output_path, index=False)
+    
 print(df.head(20))
-old_csv = load_csv(open(test_output_path),key="SKU")
-df.to_csv(test_output_path, index=False)
-new_csv = load_csv(open(test_output_path),key="SKU")
-difference = compare(old_csv,new_csv)
-pd.DataFrame(difference).to_csv("output/changes.csv")   
 
 driver.quit()
