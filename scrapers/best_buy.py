@@ -494,11 +494,12 @@ try:
     # See SKUs removed
     removed_skus = df_old[~df_old['SKU'].isin(df['SKU'])].copy()
     removed_skus['status'] = 'removed'
+    removed_skus = removed_skus[['SKU', 'status']]
 
     # See SKUs added
     added_skus = df[~df['SKU'].isin(df_old['SKU'])].copy()
     added_skus['status'] = 'added'
-
+    added_skus = added_skus[['SKU', 'status']]
     # Merge
     df_changed = pd.concat([removed_skus, added_skus], ignore_index=True)
     df_changed.to_csv('df_changed.csv', index=False)
