@@ -139,8 +139,9 @@ def process_product(driver, link):
     except Exception as e:
         product_info['Name'] = "N/A"
         print("Error getting product name:", e)
-    if "Package" in product_info['Name']: return
-    
+    unwanteds = ["Package", "Kit", "sorry"]
+    if any(unwanted in product_info['Name'] for unwanted in unwanteds):
+        return    
     #---------------------------------------------------------------------------------------------------------------------------------------------------------------GET PRODUCT SKU
     try:
         product_sku_element = WebDriverWait(driver, 20).until(
@@ -490,18 +491,27 @@ except FileNotFoundError as e: print ("Not able to locate file: ",e)
 except Exception as e: print("Error: ", e)
 #compare the SKU to see if there were models coming in and out 
 try:
+    front_columns = ['status', 'SKU']
+
     # See SKUs removed
     removed_skus = df_old[~df_old['SKU'].isin(df['SKU'])].copy()
     removed_skus['status'] = 'removed'
-    removed_skus = removed_skus[['SKU', 'status']]
+    remaining_columns = [col for col in removed_skus.columns if col not in front_columns]
+
+    removed_skus = removed_skus[front_columns+remaining_columns]
+    
 
     # See SKUs added
     added_skus = df[~df['SKU'].isin(df_old['SKU'])].copy()
     added_skus['status'] = 'added'
-    added_skus = added_skus[['SKU', 'status']]
-    # Merge
-    df_changed = pd.concat([removed_skus, added_skus], ignore_index=True)
-    df_changed.to_csv('outputs/Best_Buy/df_changed.csv', index=False)
+    remaining_columns = [col for col in removed_skus.columns if col not in front_columns]
+
+    added_skus = added_skus[front_columns+remaining_columns]
+    
+    # Exports
+    added_skus.to_csv('outputs/Best_Buy/new_models.csv', index=False)
+    removed_skus.to_csv('outputs/Best_Buy/old_models.csv', index=False)
+    
 except Exception as e:
     print("Not able to detect changes! Something went wrong: ",e)
 finally:

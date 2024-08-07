@@ -116,6 +116,13 @@ def save_csv_file(directory):
         print(f"Arquivo salvo em: {destination_file}")
     else:
         print(f"O arquivo {source_file} não existe.")
+    source_file = "df_changed.csv"
+    if os.path.exists(source_file):
+        destination_file = os.path.join(directory, "data_changed.csv")
+        shutil.copy(source_file, destination_file)
+        print(f"Arquivo salvo em: {destination_file}")
+    else:
+        print(f"O arquivo {source_file} não existe.")
 
 CTK.set_appearance_mode('dark')
 CTK.set_default_color_theme('dark-blue')

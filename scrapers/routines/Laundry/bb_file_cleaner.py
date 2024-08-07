@@ -51,18 +51,19 @@ def cleanup(df: pd.DataFrame):
         return '', sku
 
     def convert_to_decimal(value):
-        # remove inches
-        value = value.replace(' inches', '').strip()
-        
-        # If there is a space → there is a fraction
-        if ' ' in value:
-            parts = value.split()
-            # convert fraction into decimal
-            whole = float(parts[0])
-            fraction = float(Fraction(parts[1]))
-            return round(whole + fraction, 2)
-        else:
-            return round(float(value), 2)
+        if isinstance(value,str):
+            # remove inches
+            value = value.replace(' inches', '').strip()
+            
+            # If there is a space → there is a fraction
+            if ' ' in value:
+                parts = value.split()
+                # convert fraction into decimal
+                whole = float(parts[0])
+                fraction = float(Fraction(parts[1]))
+                return round(whole + fraction, 2)
+            else:
+                return round(float(value), 2)
         
     def fill_launch_year(row):
         if pd.isna(row["Brand"]) or ("Whirlpool" not in row["Brand"] and "Maytag" not in row["Brand"]):
