@@ -422,7 +422,6 @@ try:
     #Outputs
     test_output_path = 'outputs/Best_Buy/test_product_data.csv'
     real_output_path= 'outputs/Best_Buy/product_data.csv'
-    changelog_path = 'outputs/Best_Buy/changes.csv'
     #Force run
     no_file = "statics/no_file.csv"
     try:
@@ -502,7 +501,7 @@ try:
     added_skus = added_skus[['SKU', 'status']]
     # Merge
     df_changed = pd.concat([removed_skus, added_skus], ignore_index=True)
-    df_changed.to_csv('df_changed.csv', index=False)
+    df_changed.to_csv('outputs/Best_Buy/df_changed.csv', index=False)
 except Exception as e:
     print("Not able to detect changes! Something went wrong: ",e)
 finally:
