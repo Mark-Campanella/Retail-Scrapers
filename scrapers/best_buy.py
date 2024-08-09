@@ -7,9 +7,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 import pandas as pd
-import os
-from routines.Laundry.bb_file_cleaner import cleanup
-from csv_diff import load_csv, compare
 
 #-------------------------------------------------------Driver CONFIGURATION-------------------------------------------------------------------------#
 chrome_options = Options()
@@ -417,48 +414,23 @@ try:
     This section is useful for test purposes
         You need to uncomment and fix indentation, also look at the code below, might be useful
     '''
-    #Links - test and speed process
-    test_links = "statics/test_product_link_BB.csv"
-    real_links = "statics/product_link_BB.csv"
-    #Outputs
-    test_output_path = 'outputs/Best_Buy/test_product_data.csv'
-    real_output_path= 'outputs/Best_Buy/product_data.csv'
+    
+    real_output_path= 'Files/outputs/Best_Buy/product_data.csv'
     #Force run
-    no_file = "statics/no_file.csv"
-    try:
-        #If exists, run based on the links given
-        links = pd.read_csv(real_links)
-        links = links["Product Links"].to_list()
-        
-        #If no links in the file, execute the routine
-        if links == None:
-            scrape_page(driver)
-            while True:
-                handle_survey()
-                scrape_page(driver)
-                if next_page: 
-                    driver.get(next_page)
-                    print(f"Navigating to next page: {next_page}")
-                else: 
-                    break
-    #If file doesn't exist, run routine to get it and save it later
-    except:
+    no_file = "Files/statics/no_file.csv"
+    
+    scrape_page(driver)
+    while True:
+        handle_survey()
         scrape_page(driver)
-        while True:
-            handle_survey()
-            scrape_page(driver)
-            if next_page: 
-                driver.get(next_page)
-                print(f"Navigating to next page: {next_page}")
-            else: 
-                break
+        if next_page: 
+            driver.get(next_page)
+            print(f"Navigating to next page: {next_page}")
+        else: 
+            break
     
 except Exception as e:
     print("Not able to run the code, error: ", e)
-
-if not os.path.exists(real_links):
-    df = pd.DataFrame(links, columns=['Product Links'])
-    df.to_csv(real_links, index=False)
 
 process_products(driver)
 
@@ -475,14 +447,6 @@ for header in all_headers:
 remaining_headers = [header for header in all_headers if header not in (all_headers)]
 columns_order = all_headers + remaining_headers
 df = df.reindex(columns=columns_order)
-df_save = df.copy()
-
-#Now we have the df with updated info
-try:
-    df = cleanup(df)
-except Exception as e:
-    print("Not able to cleanup, ", e)
-    df = df_save
     
 #Get last scraped information
 try:
@@ -509,8 +473,8 @@ try:
     added_skus = added_skus[front_columns+remaining_columns]
     
     # Exports
-    added_skus.to_csv('outputs/Best_Buy/new_models.csv', index=False)
-    removed_skus.to_csv('outputs/Best_Buy/old_models.csv', index=False)
+    added_skus.to_csv('Files/outputs/Best_Buy/new_models.csv', index=False)
+    removed_skus.to_csv('Files/outputs/Best_Buy/old_models.csv', index=False)
     
 except Exception as e:
     print("Not able to detect changes! Something went wrong: ",e)

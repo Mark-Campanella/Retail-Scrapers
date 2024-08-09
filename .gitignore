@@ -1,4 +1,4 @@
-outputs/Amazon/*.csv
-outputs/Best_Buy/*.csv
-statics/*.csv
-scrapers/cnd_best_buy.py
+App/*
+enviroment/*
+config.json
+scrapers/routines/Laundry/_pycache_/*

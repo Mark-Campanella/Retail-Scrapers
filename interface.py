@@ -16,7 +16,7 @@ class SimpleDialog(CTK.CTk):
         button = CTK.CTkButton(self, text="OK", command=self.destroy)
         button.pack(pady=10)
         
-        self.iconbitmap('statics/error.ico')
+        self.iconbitmap('Files/statics/error.ico')
 
 class CustomFrame(CTK.CTkFrame):
     def __init__(self, master=None, label_text="", combobox_values=[], **kwargs):
@@ -74,14 +74,14 @@ def on_confirm():
     
     try:
         if selected_retail == "Best Buy" and selected_country == "USA":
-            subprocess.run(['python', 'scrapers/best_buy.py', keyword_value], check=True)
+            subprocess.run(['python', 'Files/scrapers/best_buy.py', keyword_value], check=True)
         elif selected_retail == "Best Buy" and selected_country == "CND":
             # subprocess.run(['python', 'scrapers/best_buy_cnd.py', keyword_value], check=True)
             dialog = SimpleDialog(title="In progress", message="Not there yet, future release")
             center_window(dialog, 300, 150)
             dialog.mainloop()
         elif selected_retail == "Amazon":
-            subprocess.run(['python', 'scrapers/amazon.py', keyword_value, selected_country, str(need_change_location)], check=True)
+            subprocess.run(['python', 'Files/scrapers/amazon.py', keyword_value, selected_country, str(need_change_location)], check=True)
         
         # Habilitar o botão de download após a conclusão do subprocesso
         download_button.configure(state='normal')
@@ -109,16 +109,23 @@ def on_button_click():
         save_csv_file(directory)
 
 def save_csv_file(directory):
-    source_file = "outputs/Best_Buy/test_product_data.csv"
+    source_file = "Files/outputs/Best_Buy/product_data.csv"
     if os.path.exists(source_file):
         destination_file = os.path.join(directory, "product_data.csv")
         shutil.copy(source_file, destination_file)
         print(f"Arquivo salvo em: {destination_file}")
     else:
         print(f"O arquivo {source_file} não existe.")
-    source_file = "df_changed.csv"
+    source_file = 'Files/outputs/Best_Buy/new_models.csv'
     if os.path.exists(source_file):
-        destination_file = os.path.join(directory, "data_changed.csv")
+        destination_file = os.path.join(directory, "added_models.csv")
+        shutil.copy(source_file, destination_file)
+        print(f"Arquivo salvo em: {destination_file}")
+    else:
+        print(f"O arquivo {source_file} não existe.")
+    source_file = 'Files/outputs/Best_Buy/old_models.csv'
+    if os.path.exists(source_file):
+        destination_file = os.path.join(directory, "removed_models.csv")
         shutil.copy(source_file, destination_file)
         print(f"Arquivo salvo em: {destination_file}")
     else:
@@ -134,7 +141,7 @@ center_window(root, width, height)
 
 root.title("Scraper For Retails")
 # Define the icon for the application
-root.iconbitmap('statics/favicon.ico')
+root.iconbitmap('Files/statics/favicon.ico')
 
 frame = CTK.CTkFrame(master=root)
 frame.pack(pady=20, padx=60, fill='both', expand=True)
